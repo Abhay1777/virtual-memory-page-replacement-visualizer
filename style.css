@@ -5,15 +5,15 @@
 
 /* ── 1. Design Tokens & Colour Palette ──────────────────── */
 :root {
-  /* Background & Surfaces (Rich Deep Navy System) */
-  --bg-page:           #081426;  /* Main page background */
-  --bg-content:        #0C1B30;  /* Main content / header background */
-  --bg-card:           #10243D;  /* Main cards and panels */
-  --bg-card-secondary: #142B47;  /* Secondary cards, metric cards, table headers */
-  --bg-input:          #183451;  /* Input fields and dropdowns */
-  --bg-hover:          #204363;  /* Hover surfaces */
-  --border:            #294968;  /* Subtle blue-tinted borders */
-  --border-subtle:     #1E3B5A;  /* Fine row dividers */
+  /* Background & Surfaces (Rich Dark Blue System) */
+  --bg-page:           #0B192C;  /* Distinct rich dark blue page background */
+  --bg-content:        #0E223D;  /* Dark blue content & header background */
+  --bg-card:           #132B4B;  /* Elevated dark blue cards and panels */
+  --bg-card-secondary: #18355C;  /* Secondary dark blue cards, metrics, table headers */
+  --bg-input:          #142C4E;  /* Dark blue input fields and dropdowns */
+  --bg-hover:          #1E4373;  /* Hover surfaces */
+  --border:            #264D7E;  /* Crisp blue borders */
+  --border-subtle:     #1B3D66;  /* Subtle blue section dividers */
 
   /* Vibrant Blue & Cyan Accents */
   --primary-blue:      #287BFF;  /* Primary brand blue */
@@ -21,28 +21,28 @@
   --primary-blue-active:#1A63D8; /* Pressed state */
   --accent-cyan:       #36CFF5;  /* Cool vibrant cyan */
   --cyan-subtle:       rgba(54, 207, 245, 0.12);
-  --blue-subtle:       rgba(40, 123, 255, 0.14);
+  --blue-subtle:       rgba(40, 123, 255, 0.18);
 
   /* Typography */
   --text-main:         #F4F8FF;  /* Crisp high-contrast headings & primary text */
-  --text-secondary:    #B5C7DE;  /* Secondary body text & explanations */
-  --text-muted:        #8CA4C0;  /* Muted labels & captions */
+  --text-secondary:    #C2D5ED;  /* Secondary body text & explanations */
+  --text-muted:        #94B0D3;  /* Muted labels & captions */
 
   /* Domain Status Indicators */
   --fault:             #FF7979;  /* Page faults (coral red) */
-  --fault-bg:          rgba(255, 121, 121, 0.12);
-  --fault-border:      rgba(255, 121, 121, 0.35);
+  --fault-bg:          rgba(255, 121, 121, 0.14);
+  --fault-border:      rgba(255, 121, 121, 0.4);
 
   --hit:               #48D9B0;  /* Page hits (mint green) */
-  --hit-bg:            rgba(72, 217, 176, 0.12);
-  --hit-border:        rgba(72, 217, 176, 0.35);
+  --hit-bg:          rgba(72, 217, 176, 0.14);
+  --hit-border:      rgba(72, 217, 176, 0.4);
 
   --warning:           #FFD166;  /* Warning notices */
-  --warning-bg:        rgba(255, 209, 102, 0.12);
-  --warning-border:    rgba(255, 209, 102, 0.35);
+  --warning-bg:        rgba(255, 209, 102, 0.14);
+  --warning-border:    rgba(255, 209, 102, 0.4);
 
   /* Chart Colours */
-  --chart-fifo:        #8CA4C0;  /* Neutral blue-slate */
+  --chart-fifo:        #8FA8C8;  /* Neutral blue-slate */
   --chart-lru:         #287BFF;  /* Vibrant primary blue */
   --chart-optimal:     #36CFF5;  /* Cool cyan */
 
@@ -76,8 +76,8 @@ html {
 body {
   font-family: var(--font-sans);
   background-color: var(--bg-page);
-  /* Rich deep navy background with subtle blue radial depth */
-  background-image: radial-gradient(ellipse 1300px 850px at 50% -90px, #102B4E 0%, #081426 100%);
+  /* Rich dark blue with subtle radiant blue gradient depth */
+  background-image: radial-gradient(ellipse 1300px 850px at 50% -90px, #183D6C 0%, #0B192C 100%);
   background-attachment: fixed;
   color: var(--text-secondary);
   line-height: 1.6;
