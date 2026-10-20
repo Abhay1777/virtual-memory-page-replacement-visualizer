@@ -5,15 +5,15 @@
 
 /* ── 1. Design Tokens & Colour Palette ──────────────────── */
 :root {
-  /* Background & Surfaces (Unmistakable Rich Dark Blue System) */
-  --bg-page:           #0C234E;  /* Prominent True Dark Blue */
-  --bg-content:        #0E2A5C;  /* Dark Blue Header & Content Base */
-  --bg-card:           #13336B;  /* Deep Blue Cards and Panels */
-  --bg-card-secondary: #183E82;  /* Lighter Blue Accent Surfaces & Metric Cards */
-  --bg-input:          #0F2856;  /* Dark Blue Input Fields and Dropdowns */
-  --bg-hover:          #204E9E;  /* Interactive Blue Hover */
-  --border:            #2D64B5;  /* Defined Blue Borders */
-  --border-subtle:     #1E4785;  /* Subtle Blue Section Dividers */
+  /* Background & Surfaces (Classic Deep Navy Blue System) */
+  --bg-page:           #071933;  /* Authentic Deep Navy Blue */
+  --bg-content:        #0A2246;  /* Navy Blue Content & Header Base */
+  --bg-card:           #0E2C58;  /* Navy Blue Cards and Panels */
+  --bg-card-secondary: #133970;  /* Secondary Navy Blue Panels & Metric Cards */
+  --bg-input:          #0A2144;  /* Deep Navy Input Fields and Dropdowns */
+  --bg-hover:          #1A4786;  /* Interactive Navy Hover */
+  --border:            #1F5096;  /* Crisp Navy Blue Borders */
+  --border-subtle:     #163B72;  /* Subtle Navy Dividers */
 
   /* Vibrant Blue & Cyan Accents */
   --primary-blue:      #287BFF;  /* Primary brand blue */
@@ -76,8 +76,8 @@ html {
 body {
   font-family: var(--font-sans);
   background-color: var(--bg-page);
-  /* Unmistakably rich dark blue with luminous royal blue gradient */
-  background-image: radial-gradient(ellipse 1300px 850px at 50% -90px, #1A498E 0%, #0C234E 100%);
+  /* Classic Navy Blue with subtle radial navy ambient depth */
+  background-image: radial-gradient(ellipse 1300px 850px at 50% -90px, #14366A 0%, #071933 100%);
   background-attachment: fixed;
   color: var(--text-secondary);
   line-height: 1.6;
