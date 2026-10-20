@@ -5,53 +5,53 @@
 
 /* ── 1. Design Tokens & Colour Palette ──────────────────── */
 :root {
-  /* Background & Surfaces (Rich Dark Blue System) */
-  --bg-page:           #0B192C;  /* Distinct rich dark blue page background */
-  --bg-content:        #0E223D;  /* Dark blue content & header background */
-  --bg-card:           #132B4B;  /* Elevated dark blue cards and panels */
-  --bg-card-secondary: #18355C;  /* Secondary dark blue cards, metrics, table headers */
-  --bg-input:          #142C4E;  /* Dark blue input fields and dropdowns */
-  --bg-hover:          #1E4373;  /* Hover surfaces */
-  --border:            #264D7E;  /* Crisp blue borders */
-  --border-subtle:     #1B3D66;  /* Subtle blue section dividers */
+  /* Background & Surfaces (Unmistakable Rich Dark Blue System) */
+  --bg-page:           #0C234E;  /* Prominent True Dark Blue */
+  --bg-content:        #0E2A5C;  /* Dark Blue Header & Content Base */
+  --bg-card:           #13336B;  /* Deep Blue Cards and Panels */
+  --bg-card-secondary: #183E82;  /* Lighter Blue Accent Surfaces & Metric Cards */
+  --bg-input:          #0F2856;  /* Dark Blue Input Fields and Dropdowns */
+  --bg-hover:          #204E9E;  /* Interactive Blue Hover */
+  --border:            #2D64B5;  /* Defined Blue Borders */
+  --border-subtle:     #1E4785;  /* Subtle Blue Section Dividers */
 
   /* Vibrant Blue & Cyan Accents */
   --primary-blue:      #287BFF;  /* Primary brand blue */
   --primary-blue-hover:#4695FF;  /* Bright blue hover */
   --primary-blue-active:#1A63D8; /* Pressed state */
   --accent-cyan:       #36CFF5;  /* Cool vibrant cyan */
-  --cyan-subtle:       rgba(54, 207, 245, 0.12);
-  --blue-subtle:       rgba(40, 123, 255, 0.18);
+  --cyan-subtle:       rgba(54, 207, 245, 0.16);
+  --blue-subtle:       rgba(40, 123, 255, 0.22);
 
   /* Typography */
   --text-main:         #F4F8FF;  /* Crisp high-contrast headings & primary text */
-  --text-secondary:    #C2D5ED;  /* Secondary body text & explanations */
-  --text-muted:        #94B0D3;  /* Muted labels & captions */
+  --text-secondary:    #D0E2FC;  /* Secondary body text & explanations */
+  --text-muted:        #A3C5F0;  /* Muted labels & captions */
 
   /* Domain Status Indicators */
   --fault:             #FF7979;  /* Page faults (coral red) */
-  --fault-bg:          rgba(255, 121, 121, 0.14);
-  --fault-border:      rgba(255, 121, 121, 0.4);
+  --fault-bg:          rgba(255, 121, 121, 0.18);
+  --fault-border:      rgba(255, 121, 121, 0.45);
 
   --hit:               #48D9B0;  /* Page hits (mint green) */
-  --hit-bg:          rgba(72, 217, 176, 0.14);
-  --hit-border:      rgba(72, 217, 176, 0.4);
+  --hit-bg:          rgba(72, 217, 176, 0.18);
+  --hit-border:      rgba(72, 217, 176, 0.45);
 
   --warning:           #FFD166;  /* Warning notices */
-  --warning-bg:        rgba(255, 209, 102, 0.14);
-  --warning-border:    rgba(255, 209, 102, 0.4);
+  --warning-bg:        rgba(255, 209, 102, 0.18);
+  --warning-border:    rgba(255, 209, 102, 0.45);
 
   /* Chart Colours */
-  --chart-fifo:        #8FA8C8;  /* Neutral blue-slate */
+  --chart-fifo:        #94B4DE;  /* Neutral blue-slate */
   --chart-lru:         #287BFF;  /* Vibrant primary blue */
   --chart-optimal:     #36CFF5;  /* Cool cyan */
 
   /* Geometry & Elevation */
   --radius:            8px;
   --radius-sm:         6px;
-  --shadow-sm:         0 1px 3px rgba(4, 18, 38, 0.35);
-  --shadow-card:       0 4px 20px rgba(4, 18, 38, 0.45);
-  --shadow-glow:       0 0 24px rgba(40, 123, 255, 0.18);
+  --shadow-sm:         0 1px 4px rgba(2, 12, 30, 0.45);
+  --shadow-card:       0 4px 20px rgba(2, 12, 30, 0.55);
+  --shadow-glow:       0 0 28px rgba(40, 123, 255, 0.25);
   --transition:        0.18s ease;
 
   /* Typography Stacks */
@@ -76,8 +76,8 @@ html {
 body {
   font-family: var(--font-sans);
   background-color: var(--bg-page);
-  /* Rich dark blue with subtle radiant blue gradient depth */
-  background-image: radial-gradient(ellipse 1300px 850px at 50% -90px, #183D6C 0%, #0B192C 100%);
+  /* Unmistakably rich dark blue with luminous royal blue gradient */
+  background-image: radial-gradient(ellipse 1300px 850px at 50% -90px, #1A498E 0%, #0C234E 100%);
   background-attachment: fixed;
   color: var(--text-secondary);
   line-height: 1.6;
