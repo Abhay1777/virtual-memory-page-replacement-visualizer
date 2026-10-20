@@ -1,0 +1,786 @@
+/* ============================================================
+   Virtual Memory & Page Replacement Visualizer
+   Modern Deep Navy + Vibrant Blue + Cool Cyan Theme
+   ============================================================ */
+
+/* ── 1. Design Tokens & Colour Palette ──────────────────── */
+:root {
+  /* Background & Surfaces (Rich Deep Navy System) */
+  --bg-page:           #081426;  /* Main page background */
+  --bg-content:        #0C1B30;  /* Main content / header background */
+  --bg-card:           #10243D;  /* Main cards and panels */
+  --bg-card-secondary: #142B47;  /* Secondary cards, metric cards, table headers */
+  --bg-input:          #183451;  /* Input fields and dropdowns */
+  --bg-hover:          #204363;  /* Hover surfaces */
+  --border:            #294968;  /* Subtle blue-tinted borders */
+  --border-subtle:     #1E3B5A;  /* Fine row dividers */
+
+  /* Vibrant Blue & Cyan Accents */
+  --primary-blue:      #287BFF;  /* Primary brand blue */
+  --primary-blue-hover:#4695FF;  /* Bright blue hover */
+  --primary-blue-active:#1A63D8; /* Pressed state */
+  --accent-cyan:       #36CFF5;  /* Cool vibrant cyan */
+  --cyan-subtle:       rgba(54, 207, 245, 0.12);
+  --blue-subtle:       rgba(40, 123, 255, 0.14);
+
+  /* Typography */
+  --text-main:         #F4F8FF;  /* Crisp high-contrast headings & primary text */
+  --text-secondary:    #B5C7DE;  /* Secondary body text & explanations */
+  --text-muted:        #8CA4C0;  /* Muted labels & captions */
+
+  /* Domain Status Indicators */
+  --fault:             #FF7979;  /* Page faults (coral red) */
+  --fault-bg:          rgba(255, 121, 121, 0.12);
+  --fault-border:      rgba(255, 121, 121, 0.35);
+
+  --hit:               #48D9B0;  /* Page hits (mint green) */
+  --hit-bg:            rgba(72, 217, 176, 0.12);
+  --hit-border:        rgba(72, 217, 176, 0.35);
+
+  --warning:           #FFD166;  /* Warning notices */
+  --warning-bg:        rgba(255, 209, 102, 0.12);
+  --warning-border:    rgba(255, 209, 102, 0.35);
+
+  /* Chart Colours */
+  --chart-fifo:        #8CA4C0;  /* Neutral blue-slate */
+  --chart-lru:         #287BFF;  /* Vibrant primary blue */
+  --chart-optimal:     #36CFF5;  /* Cool cyan */
+
+  /* Geometry & Elevation */
+  --radius:            8px;
+  --radius-sm:         6px;
+  --shadow-sm:         0 1px 3px rgba(4, 18, 38, 0.35);
+  --shadow-card:       0 4px 20px rgba(4, 18, 38, 0.45);
+  --shadow-glow:       0 0 24px rgba(40, 123, 255, 0.18);
+  --transition:        0.18s ease;
+
+  /* Typography Stacks */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', 'Liberation Mono', Menlo, monospace;
+}
+
+/* ── 2. Reset & Document Base ───────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-page);
+  /* Rich deep navy background with subtle blue radial depth */
+  background-image: radial-gradient(ellipse 1300px 850px at 50% -90px, #102B4E 0%, #081426 100%);
+  background-attachment: fixed;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* Custom Scrollbar for rich blue aesthetic */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-page);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-blue);
+}
+
+/* ── 3. Layout Container ────────────────────────────────── */
+.container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ── 4. Header (Navy Surface + Cyan/Blue Accents) ───────── */
+.hero {
+  background-color: var(--bg-content);
+  border-bottom: 1px solid var(--border);
+  padding: 32px 0 28px;
+  background-image: radial-gradient(ellipse 850px 240px at 50% 0%, rgba(40, 123, 255, 0.15) 0%, transparent 100%);
+  box-shadow: 0 4px 20px rgba(4, 18, 38, 0.3);
+}
+
+.hero .container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 6px;
+  padding: 4px 10px;
+  background-color: var(--blue-subtle);
+  border: 1px solid rgba(54, 207, 245, 0.35);
+  border-radius: var(--radius-sm);
+  color: var(--accent-cyan);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.hero-sub {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  max-width: 720px;
+}
+
+/* ── 5. Content Cards & Panels ──────────────────────────── */
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 26px;
+  margin-top: 24px;
+  box-shadow: var(--shadow-card);
+  transition: border-color var(--transition);
+}
+
+.card-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── 6. Configuration Panel & Inputs ────────────────────── */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 20px;
+  margin-bottom: 20px;
+}
+
+.form-group-wide {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px 14px;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.form-group select option {
+  background-color: var(--bg-input);
+  color: var(--text-main);
+}
+
+#ref-input {
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  letter-spacing: 0.02em;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(40, 123, 255, 0.35);
+}
+
+.input-error-border {
+  border-color: var(--fault) !important;
+  box-shadow: 0 0 0 3px rgba(255, 121, 121, 0.25) !important;
+}
+
+.btn-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.error-msg {
+  color: var(--fault);
+  font-size: 0.85rem;
+  min-height: 1.4em;
+  margin-top: 6px;
+  display: none;
+}
+
+.error-msg.visible {
+  display: block;
+}
+
+/* ── 7. Buttons & Interactive Controls ──────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+  transition: background-color var(--transition), border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+/* Primary Button: Vibrant Royal Blue */
+.btn-primary {
+  background-color: var(--primary-blue);
+  border-color: var(--primary-blue);
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-blue-hover);
+  border-color: var(--primary-blue-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px rgba(40, 123, 255, 0.45);
+}
+
+.btn-primary:active {
+  background-color: var(--primary-blue-active);
+  border-color: var(--primary-blue-active);
+  transform: translateY(0);
+}
+
+/* Secondary Outlined Buttons: Navy Card Background + Blue Border */
+.btn-outline {
+  background-color: var(--bg-card-secondary);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+.btn-outline:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--accent-cyan);
+  color: var(--text-main);
+  box-shadow: 0 2px 8px rgba(4, 18, 38, 0.4);
+}
+
+.btn-outline:active {
+  background-color: var(--bg-input);
+}
+
+/* Play/Pause Button: Cyan Accent Highlight */
+.btn-accent {
+  background-color: var(--bg-card-secondary);
+  border-color: rgba(54, 207, 245, 0.35);
+  color: var(--accent-cyan);
+}
+
+.btn-accent:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--accent-cyan);
+  color: #FFFFFF;
+}
+
+.btn-accent:active {
+  background-color: var(--bg-input);
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  border-radius: var(--radius-sm);
+}
+
+.btn-lg {
+  width: 100%;
+  padding: 12px 24px;
+  font-size: 0.98rem;
+}
+
+/* ── 8. Status & Notification Messages ──────────────────── */
+.hidden {
+  display: none !important;
+}
+
+.stale-banner {
+  display: none;
+  background-color: var(--bg-content);
+  border: 1px solid var(--warning-border);
+  color: var(--warning);
+  padding: 11px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  margin-top: 18px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(4, 18, 38, 0.4);
+}
+
+.stale .stale-banner {
+  display: block;
+}
+
+.stale .metrics-grid,
+.stale .table-scroll,
+.stale .bar-chart,
+.stale .interpretation-text {
+  opacity: 0.72;
+  transition: opacity var(--transition);
+}
+
+/* ── 9. Summary Metrics ─────────────────────────────────── */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+}
+
+.metric-card {
+  background-color: var(--bg-card-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 12px;
+  text-align: center;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.metric-card:hover {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 2px 12px rgba(54, 207, 245, 0.12);
+}
+
+.metric-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.metric-value {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.15;
+}
+
+/* Domain accents on metric numbers */
+.metric-card-fault .metric-value {
+  color: var(--fault);
+}
+
+.metric-card-hit .metric-value {
+  color: var(--hit);
+}
+
+.metric-card-best .metric-value {
+  color: var(--accent-cyan);
+  font-size: 1.15rem;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  padding-top: 4px;
+}
+
+/* ── 10. Tables & Data Presentation ─────────────────────── */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-card);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.data-table th {
+  background-color: var(--bg-card-secondary);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.data-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tbody tr:hover {
+  background-color: var(--bg-hover);
+}
+
+/* Trace Table Specifics */
+.trace-table td {
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+}
+
+.trace-table .page-cell {
+  font-weight: 700;
+  color: var(--accent-cyan);
+}
+
+.row-hit {
+  background-color: var(--hit-bg);
+}
+
+.row-hit td:first-child {
+  border-left: 3px solid var(--hit);
+}
+
+.row-fault {
+  background-color: var(--fault-bg);
+}
+
+.row-fault td:first-child {
+  border-left: 3px solid var(--fault);
+}
+
+/* Badges for Hit / Fault */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-family: var(--font-sans);
+}
+
+.badge-hit {
+  background-color: var(--hit-bg);
+  color: var(--hit);
+  border: 1px solid var(--hit-border);
+}
+
+.badge-fault {
+  background-color: var(--fault-bg);
+  color: var(--fault);
+  border: 1px solid var(--fault-border);
+}
+
+/* ── 11. Step-by-Step Navigation Bar ────────────────────── */
+.step-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  background-color: var(--bg-card-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.form-group-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-group-inline label {
+  margin-bottom: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.form-group-inline select {
+  width: auto;
+  padding: 5px 10px;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-size: 0.85rem;
+}
+
+.step-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.step-info {
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  color: var(--accent-cyan);
+  min-width: 95px;
+  text-align: center;
+  padding: 5px 10px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.step-hidden {
+  display: none !important;
+}
+
+.step-visible {
+  display: table-row !important;
+}
+
+/* ── 12. Visual Comparison Chart ────────────────────────── */
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 4px 0;
+}
+
+.chart-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.chart-label {
+  min-width: 72px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  text-align: right;
+  color: var(--text-main);
+}
+
+.chart-track {
+  flex: 1;
+  height: 32px;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  position: relative;
+}
+
+.chart-bar {
+  height: 100%;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 12px;
+  min-width: 32px;
+  transition: width 0.5s cubic-bezier(0.2, 0.9, 0.4, 1);
+}
+
+.chart-val {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: #FFFFFF;
+}
+
+/* Blue & Cyan Palette Bar Elements */
+.bar-fifo {
+  background-color: var(--chart-fifo);
+}
+
+.bar-lru {
+  background-color: var(--chart-lru);
+}
+
+.bar-optimal {
+  background-color: var(--chart-optimal);
+}
+
+/* ── 13. Interpretation Text ────────────────────────────── */
+.interpretation-text {
+  color: var(--text-secondary);
+  line-height: 1.75;
+  font-size: 0.92rem;
+  background-color: var(--bg-card-secondary);
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.interpretation-text strong {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+/* ── 14. Educational Section ────────────────────────────── */
+.edu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.edu-card {
+  background-color: var(--bg-card-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 18px 20px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.edu-card:hover {
+  border-color: var(--primary-blue);
+  box-shadow: 0 4px 16px rgba(40, 123, 255, 0.15);
+}
+
+.edu-card h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent-cyan);
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.edu-card p {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.edu-card strong {
+  color: var(--text-main);
+}
+
+.edu-card em {
+  font-style: italic;
+  color: var(--accent-cyan);
+}
+
+/* ── 15. Footer ─────────────────────────────────────────── */
+.footer {
+  margin-top: 40px;
+  padding: 24px 0;
+  border-top: 1px solid var(--border);
+  background-color: transparent;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+/* ── 16. Responsive Refinements ─────────────────────────── */
+@media (max-width: 768px) {
+  .hero {
+    padding: 24px 0 20px;
+  }
+  .hero h1 {
+    font-size: 1.45rem;
+  }
+  .card {
+    padding: 18px 16px;
+    margin-top: 18px;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .step-controls-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .step-nav {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: 1.25rem;
+  }
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+  .edu-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── 17. Accessibility ──────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

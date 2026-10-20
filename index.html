@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Interactive Virtual Memory and Page Replacement Algorithm Visualizer — FIFO, LRU, and Optimal simulations with step-by-step trace tables, bar charts, and educational explanations.">
+  <title>Virtual Memory &amp; Page Replacement Visualizer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════
+       HEADER
+       ═══════════════════════════════════════════════════════ -->
+  <header class="hero">
+    <div class="container">
+      <div class="hero-badge">Operating Systems Laboratory</div>
+      <h1>Virtual Memory &amp; Page Replacement Visualizer</h1>
+      <p class="hero-sub">Simulate and compare FIFO, LRU &amp; Optimal algorithms with step-by-step memory trace and performance analysis</p>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ═══════════════════════════════════════════════════════
+         INPUT PANEL
+         ═══════════════════════════════════════════════════════ -->
+    <section class="card" id="input-panel" aria-label="Simulation inputs">
+      <h2 class="card-title">Configuration</h2>
+
+      <div class="form-grid">
+        <!-- Reference string -->
+        <div class="form-group form-group-wide">
+          <label for="ref-input">Page Reference String</label>
+          <input
+            type="text"
+            id="ref-input"
+            placeholder="e.g. 7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2"
+            value="7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2"
+            autocomplete="off"
+            aria-describedby="input-error"
+          >
+          <div class="btn-row">
+            <button type="button" id="sample-btn" class="btn btn-sm btn-outline">Load Sample</button>
+            <button type="button" id="clear-btn" class="btn btn-sm btn-outline">Clear</button>
+          </div>
+          <p id="input-error" class="error-msg" role="alert" aria-live="polite"></p>
+        </div>
+
+        <!-- Frame count -->
+        <div class="form-group">
+          <label for="frame-select">Number of Frames</label>
+          <select id="frame-select">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+        </div>
+
+        <!-- Algorithm -->
+        <div class="form-group">
+          <label for="algo-select">Algorithm</label>
+          <select id="algo-select">
+            <option value="compare">Compare All</option>
+            <option value="fifo">FIFO</option>
+            <option value="lru">LRU</option>
+            <option value="optimal">Optimal</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="button" id="run-btn" class="btn btn-primary btn-lg">
+        Run Simulation
+      </button>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         RESULTS (hidden until first run)
+         ═══════════════════════════════════════════════════════ -->
+    <div id="results-section" class="hidden">
+
+      <!-- Stale banner -->
+      <div class="stale-banner">Inputs changed — click <strong>Run Simulation</strong> to update results.</div>
+
+      <!-- ── Summary Metrics ── -->
+      <section class="card" aria-label="Summary metrics">
+        <h2 class="card-title">Summary Metrics</h2>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span class="metric-label">Total References</span>
+            <span class="metric-value" id="metric-refs">—</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Frames</span>
+            <span class="metric-value" id="metric-frames">—</span>
+          </div>
+          <div class="metric-card metric-card-fault">
+            <span class="metric-label">Page Faults</span>
+            <span class="metric-value" id="metric-faults">—</span>
+          </div>
+          <div class="metric-card metric-card-hit">
+            <span class="metric-label">Page Hits</span>
+            <span class="metric-value" id="metric-hits">—</span>
+          </div>
+          <div class="metric-card metric-card-fault">
+            <span class="metric-label">Fault Rate</span>
+            <span class="metric-value" id="metric-fault-rate">—</span>
+          </div>
+          <div class="metric-card metric-card-hit">
+            <span class="metric-label">Hit Rate</span>
+            <span class="metric-value" id="metric-hit-rate">—</span>
+          </div>
+          <div class="metric-card metric-card-best">
+            <span class="metric-label">Best Algorithm</span>
+            <span class="metric-value" id="metric-best">—</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Algorithm Comparison ── -->
+      <section class="card" aria-label="Algorithm comparison">
+        <h2 class="card-title">Algorithm Comparison</h2>
+        <div class="table-scroll">
+          <table class="data-table" id="comparison-table">
+            <thead>
+              <tr>
+                <th>Algorithm</th>
+                <th>Page Faults</th>
+                <th>Page Hits</th>
+                <th>Fault Rate</th>
+                <th>Hit Rate</th>
+              </tr>
+            </thead>
+            <tbody id="comparison-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── Bar Chart ── -->
+      <section class="card" aria-label="Visual comparison chart">
+        <h2 class="card-title">Page Faults — Visual Comparison</h2>
+        <div id="bar-chart" class="bar-chart"></div>
+      </section>
+
+      <!-- ── Step-by-step Trace ── -->
+      <section class="card" aria-label="Step-by-step trace">
+        <h2 class="card-title">Step-by-Step Memory Trace</h2>
+
+        <div class="step-controls-bar">
+          <div class="form-group form-group-inline">
+            <label for="detail-algo">View algorithm:</label>
+            <select id="detail-algo">
+              <option value="fifo">FIFO</option>
+              <option value="lru">LRU</option>
+              <option value="optimal">Optimal</option>
+            </select>
+          </div>
+
+          <div class="step-nav">
+            <button type="button" id="step-prev" class="btn btn-sm btn-outline" aria-label="Previous step">Prev</button>
+            <button type="button" id="step-play" class="btn btn-sm btn-accent" aria-label="Play or pause auto-playback">▶ Play</button>
+            <button type="button" id="step-next" class="btn btn-sm btn-outline" aria-label="Next step">Next</button>
+            <button type="button" id="step-reset" class="btn btn-sm btn-outline" aria-label="Reset to show all steps">Reset</button>
+            <span id="step-info" class="step-info">Step 0 / 0</span>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table class="data-table trace-table" id="trace-table">
+            <thead id="trace-head"></thead>
+            <tbody id="trace-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── Interpretation ── -->
+      <section class="card" aria-label="Result interpretation">
+        <h2 class="card-title">Interpretation</h2>
+        <p id="interpretation" class="interpretation-text"></p>
+      </section>
+    </div><!-- /results-section -->
+
+    <!-- ═══════════════════════════════════════════════════════
+         EDUCATIONAL SECTION
+         ═══════════════════════════════════════════════════════ -->
+    <section class="card edu-section" aria-label="Educational content">
+      <h2 class="card-title">Operating Systems Concepts</h2>
+
+      <div class="edu-grid">
+
+        <div class="edu-card">
+          <h3>Virtual Memory</h3>
+          <p>Virtual memory allows a computer to use more memory than is physically available by mapping <em>virtual addresses</em> to <em>physical addresses</em>. The operating system keeps only the actively-used portions of a program in physical RAM, storing the rest on disk.</p>
+        </div>
+
+        <div class="edu-card">
+          <h3>Pages &amp; Frames</h3>
+          <p>Virtual memory is divided into fixed-size blocks called <strong>pages</strong>. Physical memory is divided into same-sized blocks called <strong>frames</strong>. The page table maps each virtual page to a physical frame.</p>
+        </div>
+
+        <div class="edu-card">
+          <h3>Demand Paging</h3>
+          <p>With demand paging, pages are loaded into memory only when they are actually referenced, rather than in advance. This reduces memory usage and startup time.</p>
+        </div>
+
+        <div class="edu-card">
+          <h3>Page Faults</h3>
+          <p>A <strong>page fault</strong> occurs when a program references a page that is not currently in physical memory. The OS must load it from disk, which is a slow operation.</p>
+        </div>
+
+        <div class="edu-card">
+          <h3>Page Replacement</h3>
+          <p>When all frames are full and a page fault occurs, the OS must choose a page to evict. The choice of which page to replace is governed by a <strong>page-replacement algorithm</strong>.</p>
+        </div>
+
+        <div class="edu-card">
+          <h3>FIFO</h3>
+          <p><strong>First-In, First-Out</strong>: Evicts the page that has been in memory the longest. Simple to implement using a queue but can perform poorly because it ignores how recently or frequently a page was used.</p>
+        </div>
+
+        <div class="edu-card">
+          <h3>LRU</h3>
+          <p><strong>Least Recently Used</strong>: Evicts the page that hasn't been accessed for the longest time. It assumes that recently-used pages are likely to be used again soon (temporal locality). Harder to implement but typically more effective than FIFO.</p>
+        </div>
+
+        <div class="edu-card">
+          <h3>Optimal (OPT)</h3>
+          <p>Evicts the page that will <strong>not be used for the longest time in the future</strong>. This produces the fewest possible faults but is <em>impossible to implement in practice</em> because it requires knowledge of future page references. It serves as a theoretical lower-bound benchmark.</p>
+        </div>
+
+        <div class="edu-card">
+          <h3>Bélády's Anomaly</h3>
+          <p>For FIFO, increasing the number of frames can sometimes <em>increase</em> page faults — a counter-intuitive phenomenon called <strong>Bélády's Anomaly</strong>. LRU and Optimal are <em>stack algorithms</em> and never exhibit this anomaly.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         FOOTER
+         ═══════════════════════════════════════════════════════ -->
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Virtual Memory &amp; Page Replacement Visualizer — Operating Systems Mini-Project</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
